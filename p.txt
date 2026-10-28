@@ -356,3 +356,78 @@ Troubleshooting commands if anything goes wrong:
 - To delete the Kubernetes deployment and service when finished:
   kubectl delete -f k8s/service.yaml
   kubectl delete -f k8s/deployment.yaml
+
+
+STAGE 11: REPEATING RELEASES FOR MULTIPLE VERSIONS (VERSION 2 & VERSION 3)
+
+Whenever your instructor asks to demonstrate another version (Version 2 or Version 3), remember:
+You ONLY change 2 lines of code (in app.py and test_app.py).
+You DO NOT need to touch Dockerfile, pipeline.yml, or Kubernetes service files!
+
+
+[PROCEDURE FOR APPLICATION VERSION 2]
+
+1. In app.py:
+   Change line 5 to:
+       return "Version 2: Updated through CI/CD!"
+
+2. In test_app.py:
+   Change line 6 to:
+       assert b"Version 2" in response.data
+
+3. Commit and push:
+   git add .
+   git commit -m "Release Application Version 2"
+   git push
+
+4. Wait for GitHub Actions to turn green.
+   Go to Docker Hub (or GitHub Actions) and copy the new Commit SHA (e.g. 8f12a3b).
+
+5. Update Kubernetes to the new image:
+   kubectl set image deployment/agile7stage agile7stage=YOUR_DOCKERHUB_USERNAME/agile7stage:NEW_COMMIT_SHA
+
+6. Check the rolling update:
+   kubectl rollout status deployment/agile7stage
+
+7. Verify in browser:
+   Open: http://localhost:30080/
+   * Output will show: "Version 2: Updated through CI/CD!"
+
+
+[PROCEDURE FOR APPLICATION VERSION 3]
+
+If your instructor asks: "Now show Version 3":
+
+1. In app.py:
+   Change line 5 to:
+       return "Version 3: Agile7Stage Live Update Complete!"
+
+2. In test_app.py:
+   Change line 6 to:
+       assert b"Version 3" in response.data
+
+3. Commit and push:
+   git add .
+   git commit -m "Release Application Version 3"
+   git push
+
+4. Wait for GitHub Actions to turn green.
+   Go to Docker Hub (or GitHub Actions) and copy the new Version 3 Commit SHA (e.g. 4c99ef1).
+
+5. Update Kubernetes to the Version 3 image:
+   kubectl set image deployment/agile7stage agile7stage=YOUR_DOCKERHUB_USERNAME/agile7stage:NEW_COMMIT_SHA
+
+6. Check the rolling update:
+   kubectl rollout status deployment/agile7stage
+
+7. Verify in browser:
+   Open: http://localhost:30080/
+   * Output will show: "Version 3: Agile7Stage Live Update Complete!"
+
+
+[BONUS: HOW TO ROLLBACK IF SIR ASKS]
+If your instructor asks "How do you roll back to the previous version instantly without re-pushing?":
+Run this single command:
+   kubectl rollout undo deployment/agile7stage
+   kubectl rollout status deployment/agile7stage
+Then refresh http://localhost:30080/ and it will instantly revert to the previous version!
